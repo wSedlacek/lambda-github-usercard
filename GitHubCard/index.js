@@ -92,7 +92,6 @@ const createCard = data => {
   cardInfo.append(cardInfoFollowing);
   cardInfo.append(cardInfoBio);
 
-  console.log(data);
   return card;
 };
 
@@ -105,5 +104,8 @@ axios
 
 axios
   .get('https://api.github.com/users/wSedlacek/followers')
-  .then(response => response.data.map(data => createCard(data)))
-  .then(cards => container.append(...cards));
+  .then(response => response.data.map(data => axios.get(data.url)))
+  .then(fetches => fetches.map(fetch => fetch.then(response => createCard(response.data))))
+  .then(cardPromises =>
+    cardPromises.forEach(cardPromise => cardPromise.then(card => container.append(card)))
+  );
